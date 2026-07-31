@@ -48,6 +48,26 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: newman/
+
+      - name: Send an Email Notification
+        if: always()
+        uses: dawidd6/action-send-mail@v18
+        with:
+          server_address: smtp.gmail.com
+          server_port:: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: Phoenix Inwarrently Flow collction running Notification
+          to: k.divya3521@gmail.com
+          from: ${{ secrets.EMAIL_USERNAME }}
+          body: |
+                Hi ,Letting you know that postmal collection has executed.
+                The report has been published here: https://kdivya3521-commits.github.io/Phoenix-Inwarranty-Flow/
+          
+          
+          
+          
+        
             
           
            
