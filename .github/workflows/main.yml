@@ -1,0 +1,74 @@
+name : Postman Collection Workflow
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+     - cron : 30 03 * * *
+     - cron : 30 14 * * * 
+     - cron : 00 03 * * 1-5
+jobs:
+  run-postman-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+      - name: Checkout the code
+        uses: actions/checkout@v6.1.0
+
+      - name: Install node js and npm
+        uses: actions/setup-node@v6.5.0
+        with: 
+          node-version: '22'
+
+      - name: Install newman and html reports globally
+        run: |
+             npm install -g newman
+             npm install -g newman-reporter-htmlextra
+
+      - name: Run the collection with newman
+        run: |
+             newman run 'Inwarranty-flowCollectionEX.postman_collection.json' \
+             -e QA.postman_environment.json \
+             -d testdata.csv \
+             -r cli,htmlextra \
+             --reporter-htmlextra-export ./newman/index.html
+
+      - name: Newman report
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: Newman Report
+          path: newman/*.html
+
+      - name: Creating github page branch
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: newman/
+
+      - name: Send an Email Notification
+        if: always()
+        uses: dawidd6/action-send-mail@v18
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: Phoenix Inwarrently Flow collction running Notification
+          to: k.divya3521@gmail.com
+          from: ${{ secrets.EMAIL_USERNAME }}
+          body: |
+                Hi ,Letting you know that postmal collection has executed.
+                The report has been published here: https://kdivya3521-commits.github.io/Phoenix-Inwarranty-Flow/
+          
+          
+          
+          
+        
+            
+          
+           
+    
